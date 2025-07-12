@@ -40,16 +40,22 @@ class Note(Base):
         DateTime(timezone=True),
         server_default=func.now()
     )
+    updated_at = Column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+        nullable=False
+    )
     user = relationship("User", back_populates="notes")
     
     def formatted_time(self, tz_offset_hours: int = 3) -> str:
         """
         Возвращает строку с датой и временем заметки в указанном часовом поясе (по умолчанию МСК, UTC+3).
         """
-        if self.created_at is None:
+        dt = self.updated_at or self.created_at
+        if dt is None:
             return ""
-        if self.created_at.tzinfo:
-            local_time = self.created_at.astimezone(timezone(timedelta(hours=tz_offset_hours)))
+        if dt.tzinfo:
+            local_time = dt.astimezone(timezone(timedelta(hours=tz_offset_hours)))
         else:
-            local_time = self.created_at.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=tz_offset_hours)))
+            local_time = dt.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=tz_offset_hours)))
         return local_time.strftime('%Y-%m-%d %H:%M')
