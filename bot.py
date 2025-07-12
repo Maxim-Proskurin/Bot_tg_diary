@@ -4,7 +4,11 @@ from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 
-from heandlers import start_handler, add_handler, list_handler, delete_handler,edit_handler, list_day_handler, list_page_handler
+from handlers.add import add_handler
+from handlers.delete import delete_handler
+from handlers.edit import edit_handler
+from handlers.start import start_handler
+from handlers.list import list_handler, list_day_handler, list_page_handler
 def get_bot_token() -> str:
     """ 
     Получает токен бота из переменных окружения.
@@ -21,14 +25,13 @@ def get_bot_token() -> str:
         raise ValueError("Токен не найден")
     return token
 
-def setup_dispatcher() -> Dispatcher:
-    """ 
-    Создает и настраивает диспетчер с хендлерами.
-    
-    Returns:
-        Dispatcher: Настроенный дисптетчер.
+def setup_dispatcher(dp: Dispatcher) -> None:
     """
-    dp = Dispatcher()
+    Регистрирует все хендлеры в диспетчере.
+
+    Args:
+        dp (Dispatcher): Диспетчер aiogram.
+    """
     dp.message.register(start_handler, Command("start"))
     dp.message.register(add_handler, Command("add"))
     dp.message.register(list_handler, Command("list"))
@@ -36,14 +39,15 @@ def setup_dispatcher() -> Dispatcher:
     dp.message.register(edit_handler, Command("edit"))
     dp.message.register(list_day_handler, Command("list_days"))
     dp.message.register(list_page_handler, Command("list_page"))
-    return dp
+    
 
 async def run_bot():
     """ 
     Запускает бота.
     """
     bot = Bot(token=get_bot_token())
-    dp = setup_dispatcher()
+    dp = Dispatcher()
+    setup_dispatcher(dp)
     await dp.start_polling(bot)
     
 if __name__ == "__main__":
