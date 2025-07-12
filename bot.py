@@ -11,6 +11,7 @@ from handlers.delete import delete_handler
 from handlers.edit import edit_handler
 from handlers.start import start_handler
 from handlers.list import list_handler, list_day_handler, list_page_handler
+from handlers.find import find_handler
 def get_bot_token() -> str:
     """ 
     Получает токен бота из переменных окружения.
@@ -41,6 +42,7 @@ def setup_dispatcher(dp: Dispatcher) -> None:
     dp.message.register(edit_handler, Command("edit"))
     dp.message.register(list_day_handler, Command("list_days"))
     dp.message.register(list_page_handler, Command("list_page"))
+    dp.message.register(find_handler, Command("find"))
     
 
 async def run_bot():
