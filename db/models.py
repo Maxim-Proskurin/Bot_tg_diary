@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, func, Integer
+from sqlalchemy import Column, String, DateTime, func, BigInteger
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
 
@@ -15,7 +15,7 @@ class Note(Base):
         unique=True,
         nullable=False)
     user_id = Column(
-        Integer,
+        BigInteger,
         nullable=False,
         index=True
     )
