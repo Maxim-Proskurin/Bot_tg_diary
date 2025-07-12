@@ -1,5 +1,7 @@
 from aiogram.types import Message
 from aiogram.filters import Command
+from db.models import Note
+from db.session import SessionLocal
 
 
 async def start_handler(msg: Message):
@@ -18,7 +20,22 @@ async def add_handler(msg: Message):
     Args:
         msg(Message): Добавление заметки от пользователя.
     """
-    await msg.answer("Добавим запись?")
+    if not msg.text:
+        await msg.answer("Ошибочка, не удалось получить текст!")
+        return
+    note_text = msg.text.removeprefix('/add').strip()
+    if not note_text:
+        await msg.answer("Напиши текст заметки после /add.")
+    user_id = msg.from_user.id if msg.from_user and msg.from_user.id else None
+    if not user_id:
+        await msg.answer("Ошибочка, не удалось определить пользователя.")
+        return
+    async with SessionLocal() as session:
+        note = Note(user_id=user_id, text=note_text)
+        session.add(note)
+        await session.commit()
+    await msg.answer("Зафиксировали")
+    
     
 async def list_handler(msg: Message):
     """ 
