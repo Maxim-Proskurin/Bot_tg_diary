@@ -1,22 +1,30 @@
 from aiogram.types import Message
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from db.models import Note, User
 from db.session import SessionLocal
 from sqlalchemy import select
 from datetime import datetime, timezone
 
-async def add_handler(msg: Message)-> None:
-    """ 
-    Обрабатывает команду /add.
-    
-    Args:
-        msg(Message): Добавление заметки от пользователя.
+class AddNoteStates(StatesGroup):
+    waiting_for_note_text = State()
+
+async def add_handler(msg: Message, state: FSMContext) -> None:
     """
-    if not msg.text:
-        await msg.answer("Ошибочка, не удалось получить текст!")
-        return
-    note_text = msg.text.removeprefix('/add').strip()
+    Обрабатывает нажатие на кнопку "➕ Добавить заметку" или команду /add.
+    Переводит пользователя в состояние ожидания ввода текста заметки.
+    """
+    await msg.answer("Введите текст заметки и отправьте его сообщением.")
+    await state.set_state(AddNoteStates.waiting_for_note_text)
+
+async def process_note_text(msg: Message, state: FSMContext) -> None:
+    """
+    Обрабатывает текст заметки, введённый пользователем.
+    """
+    note_text = msg.text.strip()
     if not note_text:
-        await msg.answer("Напиши текст заметки после /add.")
+        await msg.answer("Текст заметки не может быть пустым. Попробуйте ещё раз.")
+        return
     user_id = msg.from_user.id if msg.from_user and msg.from_user.id else None
     if not user_id:
         await msg.answer("Ошибочка, не удалось определить пользователя.")
@@ -32,4 +40,5 @@ async def add_handler(msg: Message)-> None:
         note = Note(user_id=user_id, text=note_text, updated_at=now)
         session.add(note)
         await session.commit()
-    await msg.answer("Зафиксировали")
+    await msg.answer("Заметка добавлена!")
+    await state.clear()
