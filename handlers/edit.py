@@ -4,7 +4,7 @@ from db.session import SessionLocal
 from sqlalchemy import select
 from datetime import datetime, timezone
 
-async def edit_handler(msg: Message):
+async def edit_handler(msg: Message)-> None:
     """ 
     Обрабатывает команду /edit.
     

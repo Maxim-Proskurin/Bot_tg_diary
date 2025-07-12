@@ -3,8 +3,9 @@ from db.models import Note
 from db.session import SessionLocal
 from sqlalchemy import select, func
 from datetime import datetime, timezone, timedelta
+from typing import Any
 
-async def list_handler(msg: Message):
+async def list_handler(msg: Message) -> None:
     
     """ 
     Обрабатывает команду /list.
@@ -45,7 +46,7 @@ async def list_handler(msg: Message):
         )
         await msg.answer(f"Страница 1 из {total_pages}:\n\n{text}")
 
-async def list_day_handler(msg: Message):
+async def list_day_handler(msg: Message) -> None:
     """ 
     Обрабатывает команду /list_days.
 
@@ -91,7 +92,7 @@ async def list_day_handler(msg: Message):
         )
         await msg.answer(f"Твои записи за последние {day_number} дней:\n\n{text}")
         
-async def list_page_handler(msg: Message):
+async def list_page_handler(msg: Message)-> None:
     """ 
     Обрабатывает команду /list_page.
     

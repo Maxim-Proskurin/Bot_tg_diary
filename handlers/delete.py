@@ -4,7 +4,7 @@ from db.session import SessionLocal
 from sqlalchemy import select
 
 
-async def delete_handler(msg: Message):
+async def delete_handler(msg: Message)-> None:
     """ 
     Обрабатывает команду /delete.
     
