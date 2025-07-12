@@ -2,7 +2,7 @@ from aiogram.types import Message
 from db.models import Note, User
 from db.session import SessionLocal
 from sqlalchemy import select
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 async def start_handler(msg: Message):
     """ 
@@ -139,4 +139,49 @@ async def edit_handler(msg: Message):
         await session.commit()
         await msg.answer(f"Заметка №{note_number} изменена!")
         
+
+async def list_day_handler(msg: Message):
+    """ 
+    Обрабатывает команду /list_days.
+
+    Args:
+        msg(Message): выводит заметки за N дней.
+    """
+    if not msg.text:
+        await msg.answer("Пожалуйста, укажи за сколько дней показать заметки, например: /list_days 3")
+        return
+    parts = msg.text.strip().split()
+    if len(parts) < 2 or not parts[1].isdigit():
+        await msg.answer("Пожалуйста, укажи за сколько дней показать заметки, например: /list_days 3")
+        return
+    day_number = int(parts[1])
+    if day_number < 1:
+        await msg.answer("Число дней должно быть больше нуля.")
+        return
+    user_id = msg.from_user.id if msg.from_user and msg.from_user.id else None
+    if not user_id:
+        await msg.answer("Ошибочка, не удалось определить пользователя.")
+        return
+
     
+    now = datetime.now(timezone.utc)
+    date_from = now - timedelta(days=day_number)
+
+    async with SessionLocal() as session:
+        result = await session.execute(
+            select(Note)
+            .where(
+                Note.user_id == user_id,
+                Note.created_at >= date_from
+            )
+            .order_by(Note.created_at.desc())
+        )
+        notes = result.scalars().all()
+        if not notes:
+            await msg.answer("Заметок за этот период не найдено!")
+            return
+        text = "\n\n".join(
+            f"{i+1}. {note.text}\n({note.formatted_time()})"
+            for i, note in enumerate(notes)
+        )
+        await msg.answer(f"Твои записи за последние {day_number} дней:\n\n{text}")
