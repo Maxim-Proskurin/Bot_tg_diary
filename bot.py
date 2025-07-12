@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 
-from heandlers import start_handler, add_handler, list_handler, delete_handler,edit_handler, list_day_handler
+from heandlers import start_handler, add_handler, list_handler, delete_handler,edit_handler, list_day_handler, list_page_handler
 def get_bot_token() -> str:
     """ 
     Получает токен бота из переменных окружения.
@@ -35,6 +35,7 @@ def setup_dispatcher() -> Dispatcher:
     dp.message.register(delete_handler, Command("delete"))
     dp.message.register(edit_handler, Command("edit"))
     dp.message.register(list_day_handler, Command("list_days"))
+    dp.message.register(list_page_handler, Command("list_page"))
     return dp
 
 async def run_bot():

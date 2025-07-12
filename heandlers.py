@@ -1,7 +1,7 @@
 from aiogram.types import Message
 from db.models import Note, User
 from db.session import SessionLocal
-from sqlalchemy import select
+from sqlalchemy import select, func
 from datetime import datetime, timezone, timedelta
 
 async def start_handler(msg: Message):
@@ -37,7 +37,8 @@ async def add_handler(msg: Message):
             user = User(id=user_id)
             session.add(user)
             await session.flush()
-        note = Note(user_id=user_id, text=note_text)
+        now = datetime.now(timezone.utc)
+        note = Note(user_id=user_id, text=note_text, updated_at=now)
         session.add(note)
         await session.commit()
     await msg.answer("Зафиксировали")
@@ -46,7 +47,7 @@ async def add_handler(msg: Message):
 async def list_handler(msg: Message):
     """ 
     Обрабатывает команду /list.
-    
+
     Args:
         msg(Message): Список добавленных пользователем заметок.
     """
@@ -54,17 +55,36 @@ async def list_handler(msg: Message):
     if not user_id:
         await msg.answer("Ошибочка, не удалось определить пользователя.")
         return
+
+    # Пагинация по умолчанию: первая страница, 5 заметок
+    page_number = 1
+    page_size = 5
+    offset = (page_number - 1) * page_size
+
     async with SessionLocal() as session:
+        # Считаем общее количество заметок пользователя
+        count_result = await session.execute(
+            select(func.count()).where(Note.user_id == user_id)
+        )
+        total_notes = count_result.scalar_one()
+        total_pages = (total_notes + page_size - 1) // page_size
+
         result = await session.execute(
-            select(Note).where(Note.user_id == user_id).order_by(Note.created_at.desc())
+            select(Note)
+            .where(Note.user_id == user_id)
+            .order_by(Note.created_at.desc())
+            .offset(offset)
+            .limit(page_size)
         )
         notes = result.scalars().all()
-        if notes:
-            text = "\n\n".join(
-                f"{i+1}. {note.text}\n({note.formatted_time()})"
-                for i, note in enumerate(notes)
-            )
-            await msg.answer(f"Твои записи:\n\n{text}")
+        if not notes:
+            await msg.answer("У тебя пока нет записей.")
+            return
+        text = "\n\n".join(
+            f"{offset + i + 1}. {note.text}\n({note.formatted_time()})"
+            for i, note in enumerate(notes)
+        )
+        await msg.answer(f"Страница 1 из {total_pages}:\n\n{text}")
         
 async def delete_handler(msg: Message):
     """ 
@@ -185,3 +205,55 @@ async def list_day_handler(msg: Message):
             for i, note in enumerate(notes)
         )
         await msg.answer(f"Твои записи за последние {day_number} дней:\n\n{text}")
+        
+async def list_page_handler(msg: Message):
+    """ 
+    Обрабатывает команду /list_page.
+    
+    Args:
+        msg(Message): Выводит определенное количество заметок на страницу.
+    """
+    if not msg.text:
+        await msg.answer("Пожалуйста укажите страницу для вывода! например /list_page 6")
+        return
+    page = msg.text.strip().split()
+    if len(page) < 2 or not page[1].isdigit():
+        await msg.answer("Пожалуйста, укажи номер страницы для вывода, например: /list_page 2")
+        return
+    user_id = msg.from_user.id if msg.from_user and msg.from_user.id else None
+    if not user_id:
+        await msg.answer("Ошибочка, не удалось определить пользователя.")
+        return
+    
+    page_number = int(page[1])
+    page_size = 5
+    offset = (page_number - 1) * page_size
+
+    async with SessionLocal() as session:
+        # Считаем общее количество заметок пользователя
+        count_result = await session.execute(
+            select(func.count()).where(Note.user_id == user_id)
+        )
+        total_notes = count_result.scalar_one()
+        total_pages = (total_notes + page_size - 1) // page_size
+
+        if page_number < 1 or page_number > max(total_pages, 1):
+            await msg.answer(f"Такой страницы нет. Всего страниц: {total_pages}")
+            return
+
+        result = await session.execute(
+            select(Note)
+            .where(Note.user_id == user_id)
+            .order_by(Note.created_at.desc())
+            .offset(offset)
+            .limit(page_size)
+        )
+        notes = result.scalars().all()
+        if not notes:
+            await msg.answer("На этой странице нет заметок.")
+            return
+        text = "\n\n".join(
+            f"{offset + i + 1}. {note.text}\n({note.formatted_time()})"
+            for i, note in enumerate(notes)
+        )
+        await msg.answer(f"Страница {page_number} из {total_pages}:\n\n{text}")
