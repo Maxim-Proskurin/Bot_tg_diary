@@ -1,3 +1,24 @@
-.env 
-.venv/
+# Python
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.venv/
+env/
+venv/
+# VSCode
+.vscode/
+
+# Alembic
+alembic/versions/
+
+# Секреты и переменные окружения
+.env
+.env.*
+
+# Логи
+*.log
+
+# Базы данных (если локально)
+*.sqlite3
