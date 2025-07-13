@@ -12,6 +12,7 @@ aiogram = "^3.21.0"
 sqlalchemy = "^2.0.41"
 alembic = "^1.16.4"
 python-dotenv = "^1.1.1"
+asyncpg = "^0.30.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"

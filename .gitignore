@@ -23,3 +23,6 @@ alembic/versions/
 
 # Базы данных (если локально)
 *.sqlite3
+
+# Pytest cache
+.pytest_cache/
