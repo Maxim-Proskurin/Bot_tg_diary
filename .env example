@@ -1,0 +1,9 @@
+# Пример .env файла для запуска бота
+
+BOT_TOKEN=Твой_токен_бота
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER_NAME=postgres
+DB_PASSWORD=пароль_от_бд
+DB_NAME=имя_бд
+DATABASE_URL=postgresql+asyncpg://postgres:пароль_от_бд@localhost:5432/имя_бд
