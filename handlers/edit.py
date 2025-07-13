@@ -10,19 +10,21 @@ from aiogram.fsm.state import State, StatesGroup
 class EditNoteState(StatesGroup):
     waiting_for_note_number = State()
     waiting_for_new_text = State()
-    
-async def edit_handler(msg: Message, state: FSMContext)-> None:
-    """ 
+
+
+async def edit_handler(msg: Message, state: FSMContext) -> None:
+    """
     Обрабатывает команду /edit.
-    
+
     Args:
         msg(Message): Редактирует заметки по номеру.
     """
     await msg.answer("Введите номер заметки, которую хотите редактировать!")
     await state.set_state(EditNoteState.waiting_for_note_number)
-    
+
+
 async def process_edit_note_number(msg: Message, state: FSMContext) -> None:
-    """ 
+    """
     Обрабатывает номер заметки для редактирвоания.
     """
     if not msg.text or not msg.text.strip().isdigit():
@@ -32,9 +34,10 @@ async def process_edit_note_number(msg: Message, state: FSMContext) -> None:
     await state.update_data(note_number=note_number)
     await msg.answer("Введите новый текст для заметки: ")
     await state.set_state(EditNoteState.waiting_for_new_text)
-    
+
+
 async def proceess_edit_more_text(msg: Message, state: FSMContext) -> None:
-    """ 
+    """
     Обрабатывает новый текст заметки и обновляет ее.
     """
     data = await state.get_data()
@@ -55,7 +58,7 @@ async def proceess_edit_more_text(msg: Message, state: FSMContext) -> None:
         await msg.answer("Ошибочка, не удалось определить пользователя.")
         await state.clear()
         return
-    
+
     async with SessionLocal() as session:
         result = await session.execute(
             select(Note)
@@ -73,4 +76,3 @@ async def proceess_edit_more_text(msg: Message, state: FSMContext) -> None:
         await session.commit()
         await msg.answer(f"Замтека №{note_number} изменена!")
     await state.clear()
-    

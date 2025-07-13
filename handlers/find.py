@@ -5,9 +5,11 @@ from sqlalchemy import select
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
+
 class FindNoteStates(StatesGroup):
     waiting_for_query = State()
-    
+
+
 async def find_handler(msg: Message, state: FSMContext) -> None:
     """
     Обрабатывает команду /find.
@@ -17,10 +19,11 @@ async def find_handler(msg: Message, state: FSMContext) -> None:
     """
     await msg.answer("Введите слово или фразу для поиска по заметкам: ")
     await state.set_state(FindNoteStates.waiting_for_query)
-    
+
+
 async def process_find_query(msg: Message, state: FSMContext) -> None:
-    """ 
-    Обрабатывает поискаовый запрос 
+    """
+    Обрабатывает поискаовый запрос
     пользователя и выводит результат
     """
     if not msg.text or not msg.text.strip():
@@ -35,10 +38,7 @@ async def process_find_query(msg: Message, state: FSMContext) -> None:
     async with SessionLocal() as session:
         result = await session.execute(
             select(Note)
-            .where(
-                Note.user_id == user_id,
-                Note.text.like(f"%{query}%")
-            )
+            .where(Note.user_id == user_id, Note.text.like(f"%{query}%"))
             .order_by(Note.created_at.desc())
         )
         notes = result.scalars().all()

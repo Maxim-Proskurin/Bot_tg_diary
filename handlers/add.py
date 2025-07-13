@@ -6,8 +6,10 @@ from db.session import SessionLocal
 from sqlalchemy import select
 from datetime import datetime, timezone
 
+
 class AddNoteStates(StatesGroup):
     waiting_for_note_text = State()
+
 
 async def add_handler(msg: Message, state: FSMContext) -> None:
     """
@@ -17,13 +19,16 @@ async def add_handler(msg: Message, state: FSMContext) -> None:
     await msg.answer("Введите текст заметки и отправьте его сообщением.")
     await state.set_state(AddNoteStates.waiting_for_note_text)
 
+
 async def process_note_text(msg: Message, state: FSMContext) -> None:
     """
     Обрабатывает текст заметки, введённый пользователем.
     """
     note_text = msg.text.strip()
     if not note_text:
-        await msg.answer("Текст заметки не может быть пустым. Попробуйте ещё раз.")
+        await msg.answer(
+            "Текст заметки не может быть пустым. Попробуйте ещё раз."
+        )
         return
     user_id = msg.from_user.id if msg.from_user and msg.from_user.id else None
     if not user_id:

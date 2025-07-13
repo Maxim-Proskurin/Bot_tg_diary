@@ -6,14 +6,17 @@ from datetime import datetime, timezone, timedelta
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
+
 class ListDaysStaties(StatesGroup):
     waiting_for_days = State()
-    
+
+
 class ListPageStates(StatesGroup):
     waiting_for_page = State()
 
+
 async def list_handler(msg: Message) -> None:
-    """ 
+    """
     Обрабатывает команду /list.
 
     Args:
@@ -51,21 +54,26 @@ async def list_handler(msg: Message) -> None:
             for i, note in enumerate(notes)
         )
         await msg.answer(
-            f"Страница 1 из {total_pages}:\n\n{text}\n\n"
-            "Для следующей страницы используй /list_page 2 или кнопку 📄 Заметки по страницам."
+            (
+                f"Страница 1 из {total_pages}:\n\n{text}\n\n"
+                "Для следующей страницы используй /list_page 2 "
+                "или кнопку 📄 Заметки по страницам."
+            )
         )
 
+
 async def list_day_handler(msg: Message, state: FSMContext) -> None:
-    """ 
+    """
     Обрабатывает команду /list_day или кнопку "Заметки за N дней.
     Запрашивает у пользователя количество дней.
     """
     await msg.answer("Введите за сколько дней показать заметки.")
     await state.set_state(ListDaysStaties.waiting_for_days)
-    
+
+
 async def process_list_days(msg: Message, state: FSMContext) -> None:
-    """ 
-    Обрабатывает количество дней,введеное 
+    """
+    Обрабатывает количество дней,введеное
     пользователем, и выводит заметки
     """
     if not msg.text or not msg.text.strip().isdigit():
@@ -80,17 +88,14 @@ async def process_list_days(msg: Message, state: FSMContext) -> None:
         await msg.answer("Ошибочка, не удалось определить пользователя.")
         await state.clear()
         return
-    
+
     now = datetime.now(timezone.utc)
     date_from = now - timedelta(days=day_number)
-    
+
     async with SessionLocal() as session:
         result = await session.execute(
             select(Note)
-            .where(
-                Note.user_id == user_id,
-                Note.created_at >= date_from
-            )
+            .where(Note.user_id == user_id, Note.created_at >= date_from)
             .order_by(Note.created_at.desc())
         )
         notes = result.scalars().all()
@@ -100,24 +105,28 @@ async def process_list_days(msg: Message, state: FSMContext) -> None:
             return
         text = "\n\n".join(
             f"{i+1}. {note.text}\n({note.formatted_time()})"
-            for i, note in enumerate(notes)
+            for i,
+            note in enumerate(notes)
         )
         await msg.answer(
             f"Твои записи за последние {day_number} дней:\n\n{text}\n\n"
-            "Для вывода всех заметок используй /list или кнопку 📋 Список заметок."
+            "Для вывода всех заметок используй /list"
+            "или кнопку 📋 Список заметок."
         )
     await state.clear()
-    
+
+
 async def list_page_handler(msg: Message, state: FSMContext) -> None:
-    """ 
+    """
     Обрабатывает команду /list_page.
     Запрашивает у пользователя номер страницы.
     """
     await msg.answer("Введите номер страницы для вывода: ")
     await state.set_state(ListPageStates.waiting_for_page)
-    
-async def process_list_page(msg:Message, state: FSMContext) -> None:
-    """ 
+
+
+async def process_list_page(msg: Message, state: FSMContext) -> None:
+    """
     Обрабатывает номер страницы, введенный
     пользователем и выводит заметки
     """
@@ -126,27 +135,30 @@ async def process_list_page(msg:Message, state: FSMContext) -> None:
         return
     page_number = int(msg.text.strip())
     page_size = 5
-    offset = (page_number - 1) *page_size
+    offset = (page_number - 1) * page_size
     user_id = msg.from_user.id if msg.from_user and msg.from_user.id else None
     if not user_id:
         await msg.answer("Ошибочка, не удалось определить пользователя.")
         await state.clear()
         return
-    
+
     async with SessionLocal() as session:
         count_result = await session.execute(
-            select(func.count())
-            .where(Note.user_id == user_id)
+            select(func.count()).where(Note.user_id == user_id)
         )
-        
+
         total_notes = count_result.scalar_one()
-        total_pages = (total_notes + page_size -1) // page_size
-        
-        if page_number < 1 or page_number > max(total_pages, 1):
-            await msg.answer("Такой страницы нет. Всего страниц: {total_pages}")
+        total_pages = (total_notes + page_size - 1) // page_size
+
+        if page_number < 1 or page_number > max(
+            total_pages, 1
+        ):
+            await msg.answer(
+                "Такой страницы нет. Всего страниц: {total_pages}"
+                )
             await state.clear()
             return
-        
+
         result = await session.execute(
             select(Note)
             .where(Note.user_id == user_id)
@@ -161,10 +173,12 @@ async def process_list_page(msg:Message, state: FSMContext) -> None:
             return
         text = "\n\n".join(
             f"{offset + i + 1}. {note.text}\n({note.formatted_time()})"
-            for i, note in enumerate(notes)
+            for i,
+            note in enumerate(notes)
         )
         await msg.answer(
             f"Страница {page_number} из {total_pages}:\n\n{text}\n\n"
-            "Для другой страницы используй /list_page N или кнопку 📄 Заметки по страницам."
+            "Для другой страницы используй /list_page N"
+            "или кнопку 📄 Заметки по страницам."
         )
     await state.clear()

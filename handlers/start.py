@@ -1,7 +1,8 @@
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 
+
 async def start_handler(msg: Message) -> None:
-    """ 
+    """
     Обрабатывает команду /start.
 
     Args:
@@ -9,12 +10,21 @@ async def start_handler(msg: Message) -> None:
     """
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="➕ Добавить заметку"), KeyboardButton(text="📋 Список заметок")],
-            [KeyboardButton(text="❌ Удалить заметку"), KeyboardButton(text="✏️ Изменить заметку")],
-            [KeyboardButton(text="📅 Заметки за N дней"), KeyboardButton(text="📄 Заметки по страницам")],
-            [KeyboardButton(text="🔍 Поиск по заметкам")]
+            [
+                KeyboardButton(text="➕ Добавить заметку"),
+                KeyboardButton(text="📋 Список заметок"),
+            ],
+            [
+                KeyboardButton(text="❌ Удалить заметку"),
+                KeyboardButton(text="✏️ Изменить заметку"),
+            ],
+            [
+                KeyboardButton(text="📅 Заметки за N дней"),
+                KeyboardButton(text="📄 Заметки по страницам"),
+            ],
+            [KeyboardButton(text="🔍 Поиск по заметкам")],
         ],
-        resize_keyboard=True
+        resize_keyboard=True,
     )
     await msg.answer(
         "👋 Привет! Я твой ежедневник.\n\n"
@@ -26,5 +36,5 @@ async def start_handler(msg: Message) -> None:
         "📅 Заметки за N дней - фильтр по времени\n"
         "📄 Заметки по страницам - листать по страницам\n"
         "🔍 Поиск по заметкам - найти запись по слову",
-        reply_markup=keyboard
+        reply_markup=keyboard,
     )
