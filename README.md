@@ -1,8 +1,10 @@
 # Popishem Bot 📝
 
 [![Python application](https://github.com/Maxim-Proskurin/Bot_tg_diary/actions/workflows/python-app.yml/badge.svg)](https://github.com/Maxim-Proskurin/Bot_tg_diary/actions/workflows/python-app.yml)
-[![codecov](https://img.shields.io/codecov/c/github/Maxim-Proskurin/Bot_tg_diary?label=coverage)](https://codecov.io/gh/Maxim-Proskurin/Bot_tg_diary)
+[![codecov](https://codecov.io/gh/Maxim-Proskurin/Bot_tg_diary/graph/badge.svg?token=G8S0VGU3VM)](https://codecov.io/gh/Maxim-Proskurin/Bot_tg_diary)
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+
 
 > Автор: **Максим Проскурин**
 
