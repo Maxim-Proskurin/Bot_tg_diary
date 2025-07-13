@@ -10,7 +10,7 @@ from handlers.delete import delete_handler, process_delete_note,DeleteNoteStates
 from handlers.edit import edit_handler, process_edit_note_number, EditNoteState
 from handlers.start import start_handler
 from handlers.list import list_handler, list_day_handler, list_page_handler
-from handlers.find import find_handler
+from handlers.find import find_handler, FindNoteStates, process_find_query
 def get_bot_token() -> str:
     """ 
     Получает токен бота из переменных окружения.
@@ -42,10 +42,10 @@ def setup_dispatcher(dp: Dispatcher) -> None:
     dp.message.register(process_delete_note, DeleteNoteStates.waiting_for_note_number)
     dp.message.register(edit_handler, lambda msg, **_: msg.text in ["/edit", "✏️ Изменить заметку"])
     dp.message.register(process_edit_note_number, EditNoteState.waiting_for_note_number)
-    dp.message.register(list_day_handler, Command("list_days"))
-    dp.message.register(list_page_handler, Command("list_page"))
-    dp.message.register(find_handler, Command("find"))
-
+    dp.message.register(list_day_handler, lambda msg, **_: msg.text in ["/list_days", "📅 Заметки за N дней"])
+    dp.message.register(list_page_handler, lambda msg, **_: msg.text in ["/list_page", "📄 Заметки по страницам"])
+    dp.message.register(find_handler, lambda msg, **_: msg.text in ["/find", "🔍 Поиск по заметкам"])
+    dp.message.register(process_find_query, FindNoteStates.waiting_for_query)
 async def run_bot():
     """ 
     Запускает бота.
