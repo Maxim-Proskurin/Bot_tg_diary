@@ -7,7 +7,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from handlers.add import add_handler, process_note_text, AddNoteStates
 from handlers.delete import delete_handler, process_delete_note,DeleteNoteStates
-from handlers.edit import edit_handler
+from handlers.edit import edit_handler, process_edit_note_number, EditNoteState
 from handlers.start import start_handler
 from handlers.list import list_handler, list_day_handler, list_page_handler
 from handlers.find import find_handler
@@ -40,7 +40,8 @@ def setup_dispatcher(dp: Dispatcher) -> None:
     dp.message.register(list_handler, Command("list"))
     dp.message.register(delete_handler, lambda msg, **_: msg.text in ["/delete", "❌ Удалить заметку"])
     dp.message.register(process_delete_note, DeleteNoteStates.waiting_for_note_number)
-    dp.message.register(edit_handler, Command("edit"))
+    dp.message.register(edit_handler, lambda msg, **_: msg.text in ["/edit", "✏️ Изменить заметку"])
+    dp.message.register(process_edit_note_number, EditNoteState.waiting_for_note_number)
     dp.message.register(list_day_handler, Command("list_days"))
     dp.message.register(list_page_handler, Command("list_page"))
     dp.message.register(find_handler, Command("find"))
