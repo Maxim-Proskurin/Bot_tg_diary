@@ -1,4 +1,4 @@
-# Diary Bot 📝
+# Popishem Bot 📝
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Maxim-Proskurin/Bot_tg_diary/ci.yml?branch=main&label=CI)](https://github.com/Maxim-Proskurin/Bot_tg_diary/actions)
 [![codecov](https://img.shields.io/codecov/c/github/Maxim-Proskurin/Bot_tg_diary?label=coverage)](https://codecov.io/gh/Maxim-Proskurin/Bot_tg_diary)
