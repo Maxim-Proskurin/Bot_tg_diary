@@ -35,10 +35,12 @@ jobs:
 
     - name: Lint with flake8
       run: poetry run flake8 .
-      
-    - name: Run tests
-      run: poetry run pytest --cov=handlers --cov=db --cov-report=term-missing
 
+    - name: Run tests
+      run: poetry run pytest --cov=handlers --cov=db --cov-report=xml --cov-report=term-missing
+
+    - name: List files for debug
+      run: ls -la
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
       with:
